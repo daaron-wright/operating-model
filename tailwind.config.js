@@ -1,10 +1,20 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        everett: ['TW Everett', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        'heading-1': ['2rem', { lineHeight: '2.5rem', fontWeight: '400' }],
+        'heading-2': ['1.5rem', { lineHeight: '2rem', fontWeight: '400' }],
+        'body': ['1rem', { lineHeight: '1.5rem', fontWeight: '400' }],
+      },
+    },
   },
   plugins: [],
 }

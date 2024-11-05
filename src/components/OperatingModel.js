@@ -4,7 +4,7 @@ import { Globe2, Users, ChevronRight, ChevronLeft, ChevronDown, ChevronUp, X } f
 const InfoPanel = ({ node, country, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
-      <div className="w-96 bg-white rounded-lg shadow-xl border border-gray-200">
+      <div className="w-96 bg-white rounded-lg shadow-xl border border-gray-200 font-everett">
         <div className="p-6 space-y-6">
           <div className="flex justify-between items-start">
             <div>
@@ -72,7 +72,9 @@ const OperatingModel = () => {
   const sections = {
     CONSULT_PROPOSITIONS: {
       name: 'Consult Propositions',
-      color: '#2D7261',
+      color: '#29707A',
+      bgColor: 'bg-gray-50',
+      textColor: 'text-white',
       subsections: {
         GLOBAL: { 
           color: '#3E8975', 
@@ -89,6 +91,7 @@ const OperatingModel = () => {
         SERVICE: { 
           color: '#2D7261', 
           name: 'Service Lines',
+          textColor: 'text-white',
           items: [
             { 
               id: 'transform', 
@@ -107,6 +110,7 @@ const OperatingModel = () => {
     ENABLING: { 
       color: '#76B5A8', 
       name: 'Enabling Capabilities',
+      textColor: 'text-white',
       items: [
         { 
           id: 'growth', 
@@ -126,6 +130,8 @@ const OperatingModel = () => {
     CHANNELS: { 
       color: '#CCE3F0', 
       name: 'Channels to Market',
+      bgColor: 'bg-gray-50',
+      textColor: 'text-black',
       items: [
         { id: 'partners', name: 'Consult Partners' },
         { id: 'vital', name: 'Vital' },
@@ -156,14 +162,14 @@ const OperatingModel = () => {
     });
   };
 
-  const renderItems = (items) => (
+  const renderItems = (items, parentKey) => (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
       {items.map((item) => (
         <div
           key={item.id}
           className={`p-3 rounded border transition-colors cursor-pointer
             ${selectedNode?.id === item.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'}`}
-          onClick={() => setSelectedNode(item)}
+          onClick={() => setSelectedNode(selectedNode?.id === item.id ? null : item)}
         >
           <div className="font-medium text-sm">{item.name}</div>
           {item.details && (
@@ -181,8 +187,71 @@ const OperatingModel = () => {
     </div>
   );
 
+  const renderSection = (sectionKey, section) => {
+    const isConsultPropositions = sectionKey === 'CONSULT_PROPOSITIONS';
+    const sectionClassName = `rounded-lg border border-gray-200 ${section.bgColor || ''} p-4 mb-6`;
+
+    return (
+      <div key={sectionKey} className={sectionClassName}>
+        <div 
+          className="flex items-center gap-2 mb-4 cursor-pointer"
+          onClick={() => toggleSection(sectionKey)}
+        >
+          <div 
+            className={`w-48 p-3 rounded font-medium flex items-center justify-between ${section.textColor}`}
+            style={{ backgroundColor: section.color }}
+          >
+            <span>{section.name}</span>
+            {expandedSections.has(sectionKey) ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
+          </div>
+          <div className="flex-1 h-10 border-b border-dashed border-gray-300" />
+        </div>
+
+        {expandedSections.has(sectionKey) && (
+          <div className={`${isConsultPropositions ? 'ml-8' : 'ml-48'}`}>
+            {isConsultPropositions ? (
+              Object.entries(section.subsections).map(([key, subsection]) => (
+                <div key={key} className="mb-4 last:mb-0">
+                  <div 
+                    className="flex items-center gap-2 mb-2 cursor-pointer"
+                    onClick={() => toggleSection('CONSULT_PROPOSITIONS', key)}
+                  >
+                    <div 
+                      className="w-48 p-3 rounded font-medium text-white flex items-center justify-between"
+                      style={{ backgroundColor: subsection.color }}
+                    >
+                      <span>{subsection.name}</span>
+                      {expandedSections.has(`CONSULT_PROPOSITIONS-${key}`) ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4" />
+                      )}
+                    </div>
+                    <div className="flex-1 h-10 border-b border-dashed border-gray-300" />
+                  </div>
+
+                  {expandedSections.has(`CONSULT_PROPOSITIONS-${key}`) && (
+                    <div className="ml-48">
+                      {renderItems(subsection.items, `${sectionKey}-${key}`)}
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              renderItems(section.items, sectionKey)
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <div className="w-full bg-white rounded-lg shadow-sm relative">
+    <div className="w-full bg-white rounded-lg shadow-sm font-everett">
       <div className="p-4 border-b">
         <div className="flex items-center gap-4 mb-4">
           <h1 className="text-2xl font-bold text-gray-800">Consult Operating Model Horizon 1:</h1>
@@ -210,7 +279,6 @@ const OperatingModel = () => {
           style={{ scrollBehavior: 'smooth' }}
         >
           <div className="inline-block min-w-max p-4">
-            {/* Country tiles row */}
             <div className="flex gap-2 mb-6 ml-48">
               {countries.map((country) => (
                 <div
@@ -226,90 +294,10 @@ const OperatingModel = () => {
               ))}
             </div>
 
-            {/* Main sections */}
             <div className="flex flex-col gap-4">
-              {/* Consult Propositions Section */}
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 mb-6">
-                <div 
-                  className="flex items-center gap-2 mb-4 cursor-pointer"
-                  onClick={() => toggleSection('CONSULT_PROPOSITIONS')}
-                >
-                  <div className="w-48 p-3 rounded font-medium text-white flex items-center justify-between bg-gray-800">
-                    <span>Consult Propositions</span>
-                    {expandedSections.has('CONSULT_PROPOSITIONS') ? (
-                      <ChevronUp className="w-4 h-4" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4" />
-                    )}
-                  </div>
-                  <div className="flex-1 h-10 border-b border-dashed border-gray-300" />
-                </div>
-
-                {expandedSections.has('CONSULT_PROPOSITIONS') && (
-                  <div className="ml-8">
-                    {Object.entries(sections.CONSULT_PROPOSITIONS.subsections).map(([key, subsection]) => (
-                      <div key={key} className="mb-4 last:mb-0">
-                        <div 
-                          className="flex items-center gap-2 mb-2 cursor-pointer"
-                          onClick={() => toggleSection('CONSULT_PROPOSITIONS', key)}
-                        >
-                          <div 
-                            className="w-48 p-3 rounded font-medium text-white flex items-center justify-between"
-                            style={{ backgroundColor: subsection.color }}
-                          >
-                            <span>{subsection.name}</span>
-                            {expandedSections.has(`CONSULT_PROPOSITIONS-${key}`) ? (
-                              <ChevronUp className="w-4 h-4" />
-                            ) : (
-                              <ChevronDown className="w-4 h-4" />
-                            )}
-                          </div>
-                          <div className="flex-1 h-10 border-b border-dashed border-gray-300" />
-                        </div>
-
-                        {expandedSections.has(`CONSULT_PROPOSITIONS-${key}`) && (
-                          <div className="ml-48">
-                            {renderItems(subsection.items)}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Other sections */}
-              {Object.entries(sections).map(([sectionKey, section]) => {
-                if (sectionKey === 'CONSULT_PROPOSITIONS') return null;
-                
-                return (
-                  <div key={sectionKey} className="flex flex-col">
-                    <div 
-                      className="flex items-center gap-2 mb-2 cursor-pointer"
-                      onClick={() => toggleSection(sectionKey)}
-                    >
-                      <div 
-                        className="w-48 p-3 rounded font-medium text-white flex items-center justify-between"
-                        style={{ backgroundColor: section.color }}
-                      >
-                        <span>{section.name}</span>
-                        {expandedSections.has(sectionKey) ? (
-                          <ChevronUp className="w-4 h-4" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4" />
-                        )}
-                      </div>
-                      <div className="flex-1 h-10 border-b border-dashed border-gray-300" />
-                    </div>
-
-                    {expandedSections.has(sectionKey) && (
-                      <div className="ml-48">
-                        {renderItems(section.items)}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+              {Object.entries(sections).map(([sectionKey, section]) => 
+                renderSection(sectionKey, section)
+              )}
             </div>
           </div>
         </div>

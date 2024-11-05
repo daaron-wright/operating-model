@@ -1,0 +1,12 @@
+@font-face {
+    font-family: 'TWK Everett';
+    src: url('/Library/Fonts/TWKEverett-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Custom utility classes for the font */
+.font-everett {
+    font-family: 'TWK Everett', system-ui, sans-serif;
+}
